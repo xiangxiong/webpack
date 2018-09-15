@@ -65,30 +65,49 @@ webpack 是一个打包模块化 Javascript 的工具, 在webpack里 一切文�
 - 循环遍历AST树，拼接输出js。
 
 ## 4.1 如何编写一个webpack loader
-- loader 本质上是一个函数.
-- 创建loader的目录及模块文件.
-- 在 webpack 中配置 rule 及 loader 的解析路径.
-- 遵循原则设计和开发 loader.
-
+- loader 是导出为一个函数的 node 模块。该函数在 loader 转换资源的时候调用.
+- 首先明确你这个loader具备什么功能: 比如代码压缩功能.
 ```js
 html-minify-loader.js
-var Minimize = require('minimize');
 var loaderUtils = require('loader-utils');
-
+var Minimize = require('minimize');
 module.exports = function(source) {
-    console.log("source",source);
-    var callback = this.async();
-    if (this.cacheable) {
-        this.cacheable();
-    }
-    var opts = loaderUtils.getOptions(this) || {};
-    console.log("opts",opts);
-    var minimize = new Minimize(opts);
-    minimize.parse(source, callback);
+    var minimize = new Minimize();
+    return minimize.parse(source);
 };
-
 ```
+- 本地开发环境:匹配(test)单个 loader，你可以简单通过在 rule 对象设置 path.resolve 指向这个本地文件
+```
+module.exports = {
+  //...
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        use: [
+          {
+            loader: path.resolve('path/to/loader.js'),
+            options: {/* ... */}
+          }
+        ]
+      }
+    ]
+  }
+};
+```
+- 匹配(test)多个 loaders，你可以使用 resolveLoader.modules 配置
+```js
+module.exports = {
+  //...
+  resolveLoader: {
+    modules: [
+      'node_modules',
+      path.resolve(__dirname, 'loaders')
+    ]
+  }
+};
+```
+
 参考文献：
-https://webpack.docschina.org/contribute/writing-a-loader/ 
-
-
+- https://webpack.docschina.org/contribute/writing-a-loader/ 
+- https://juejin.im/post/5a698a316fb9a01c9f5b9ca0
