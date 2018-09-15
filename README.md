@@ -88,5 +88,7 @@ module.exports = function(source) {
 };
 
 ```
+参考文献：
+https://webpack.docschina.org/contribute/writing-a-loader/ 
 
 
