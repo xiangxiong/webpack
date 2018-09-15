@@ -58,10 +58,35 @@ webpack 是一个打包模块化 Javascript 的工具, 在webpack里 一切文�
 // npx webpack --mode development
 
 ## 4.手写webpack
-读取文件分析模块依赖
-对模块进行解析执行(深度遍历)
-针对不同的模块使用相应的loader
-编译模块，生成抽象语法树AST。
-循环遍历AST树，拼接输出js。
-npm link
+- 读取文件分析模块依赖
+- 对模块进行解析执行(深度遍历)
+- 针对不同的模块使用相应的loader
+- 编译模块，生成抽象语法树AST。
+- 循环遍历AST树，拼接输出js。
+
+## 4.1 如何编写一个webpack loader
+- loader 本质上是一个函数.
+- 创建loader的目录及模块文件.
+- 在 webpack 中配置 rule 及 loader 的解析路径.
+- 遵循原则设计和开发 loader.
+
+```js
+html-minify-loader.js
+var Minimize = require('minimize');
+var loaderUtils = require('loader-utils');
+
+module.exports = function(source) {
+    console.log("source",source);
+    var callback = this.async();
+    if (this.cacheable) {
+        this.cacheable();
+    }
+    var opts = loaderUtils.getOptions(this) || {};
+    console.log("opts",opts);
+    var minimize = new Minimize(opts);
+    minimize.parse(source, callback);
+};
+
+```
+
 

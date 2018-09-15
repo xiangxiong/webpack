@@ -4,15 +4,29 @@
 let entry = './src/index.js'; //入口文件
 let out = './dist/main.js'; // 出口文件
 
+let modules = [];
 let fs = require('fs');
 let path = require('path');
 let script = fs.readFileSync(entry,'utf-8');
-let modules = [];
+
+let styleLoader = function(source){
+    // 负责将结果进行更改 更改后继续执行
+    // source 代表就是样式文件中的内容
+    let cssStyle = JSON.stringify(source).replace(/[\r\n]/g,"");
+    return `
+    let style = document.createElement('style');
+    style.innerText= ${cssStyle};
+    document.head.appendChild(style)
+    `
+}
 
 // 处理多个依赖关系.
 script.replace(/require\(['"](.+?)['"]\)/g,function(){
     let name = arguments[1] ; // a.js
     let content = fs.readFileSync(path.join('./src',arguments[1]),'utf-8');
+    if(/\.css$/.test(name)){
+        content = styleLoader(content);
+    }
     modules.push({
         name,content
     });
@@ -29,7 +43,6 @@ let ejs = require('ejs');
 
 let template =`(function(modules) { 
     function require(moduleId) {
-
         var module = {
             exports: {}
         };
@@ -52,14 +65,11 @@ let template =`(function(modules) {
      <%}%>
 });`;
 
-
     let result = ejs.render(template,{
          entry,
          script,
          modules
      });
-    
-     
 
      //result 为替换后的结果，最终要写入output 中.
      fs.writeFileSync(out,result);

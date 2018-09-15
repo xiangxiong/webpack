@@ -14,6 +14,7 @@
     (function(module, exports, require) {
         eval(`let result = require('./hello.js');
 let resultc = require('./c.js');
+require('./index.css');
 console.log(result);
 console.log(resultc);
  `);
@@ -27,6 +28,15 @@ console.log(resultc);
          "./c.js":
          (function(module, exports, require) {
              eval(`module.exports = 'c';`)
+          })
+     ,
+         "./index.css":
+         (function(module, exports, require) {
+             eval(`
+    let style = document.createElement('style');
+    style.innerText= "body{background: red;}";
+    document.head.appendChild(style)
+    `)
           })
      
 });
